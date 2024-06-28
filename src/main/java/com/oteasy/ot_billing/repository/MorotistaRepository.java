@@ -26,7 +26,7 @@ public class MorotistaRepository {
     @Autowired
     Dotenv dotenv;
     private final String DB_URL = "URL.DB_BASE";
-    private final String URI_DRIVER = "URL.DRIVER.BASE";
+    private final String URI_DRIVER = "URL.DRIVER";
     private final String URI_LIST = "URL.DRIVER.LIST";
     private final String URI_NEW = "URL.DRIVER.NEW";
 
@@ -60,9 +60,8 @@ public class MorotistaRepository {
     public List<MotoristaDTO> listAll() throws IOException, InterruptedException{
         //Constroi a URL
         String db_url = dotenv.get(DB_URL);
-        String driver_sufix = dotenv.get(URI_DRIVER);
         String list_sufix = dotenv.get(URI_LIST);
-        String url = db_url.concat(driver_sufix).concat(list_sufix);
+        String url = db_url.concat(list_sufix);
 
         // Cria uma instância de HttpClient
         HttpClient client = HttpClient.newHttpClient();
@@ -88,30 +87,28 @@ public class MorotistaRepository {
 
     public Motorista save(Motorista motorista) throws Exception{
         String db_url = dotenv.get(DB_URL);
-        String driver_sufix = dotenv.get(URI_DRIVER);
         String new_sufix = dotenv.get(URI_NEW);
-        String url = db_url.concat(driver_sufix).concat(new_sufix);
+        String url = db_url.concat(new_sufix);
 
         // Cria uma instância de HttpClient
         HttpClient client = HttpClient.newHttpClient();
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        System.out.println(motorista.getNome() + " " + motorista.getTelefone());
         motorista.setId(-1);
         String body = objectMapper.writeValueAsString(motorista);
-        System.out.println(body);
 
         // Cria uma solicitação GET
         HttpRequest request = HttpRequest.newBuilder() 
                 .uri(URI.create(url))
+                .header("Content-Type", "application/json")
                 .POST(BodyPublishers.ofString(body))
                 .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        
         Motorista motoristaResponse = null;
         try{
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            
             System.out.println("Statuscode: " + response.statusCode());
             if(response.statusCode() != 201){
                 System.out.println(response.body());
@@ -124,5 +121,49 @@ public class MorotistaRepository {
         }
         return motoristaResponse;
 
+    }
+
+    public void deleteMotorista(int id) throws Exception{
+        String db_url = dotenv.get(DB_URL);
+        String driver_sufix = dotenv.get(URI_DRIVER);
+        String url = db_url.concat(driver_sufix) + id;
+
+        // Cria uma instância de HttpClient
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder() 
+                .uri(URI.create(url))
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if(response.statusCode() != 200)
+            throw new Exception("Motorista não encontrado");    
+    }
+
+    public Motorista updateMotorista(int id, Motorista motorista) throws IOException, InterruptedException{
+        String db_url = dotenv.get(DB_URL);
+        String driver_sufix = dotenv.get(URI_DRIVER);
+        String url = db_url.concat(driver_sufix) + id;
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String body = objectMapper.writeValueAsString(motorista);
+
+        HttpClient client = HttpClient.newHttpClient();
+
+        // Cria uma solicitação GET
+        HttpRequest request = HttpRequest.newBuilder() 
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .PUT(BodyPublishers.ofString(body))
+                .build();
+        
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Motorista motoristaResponse = null;
+        System.out.println(response.body());
+
+        motoristaResponse = objectMapper.readValue(response.body(), Motorista.class);
+        return motoristaResponse;
+        
     }
 }
