@@ -73,13 +73,13 @@ public class MotoristaController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<?> deleteMotorista(@PathVariable int id){
+    public ResponseEntity<String> deleteMotorista(@PathVariable int id){
         try{
             motoristaRepository.deleteMotorista(id);
         }catch(Exception e){
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(new Motorista(-1, "", "", ""), HttpStatus.OK);
+        return new ResponseEntity<String>("Motorista deletado com sucesso!", HttpStatus.OK);
     }
 
     @PutMapping("{id}")

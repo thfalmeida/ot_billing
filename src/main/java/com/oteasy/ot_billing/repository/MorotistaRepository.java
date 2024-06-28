@@ -146,7 +146,6 @@ public class MorotistaRepository {
         String url = db_url.concat(driver_sufix) + id;
 
         ObjectMapper objectMapper = new ObjectMapper();
-
         String body = objectMapper.writeValueAsString(motorista);
 
         HttpClient client = HttpClient.newHttpClient();

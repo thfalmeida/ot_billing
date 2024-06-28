@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oteasy.ot_billing.dto.ClienteDTO;
 import com.oteasy.ot_billing.model.Cliente;
-import com.oteasy.ot_billing.model.Motorista;
 import com.oteasy.ot_billing.util.ClienteWrapper;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -60,14 +59,11 @@ public class ClienteRepository {
     }   
 
     public Cliente findById(int id) throws IOException, InterruptedException{
-        
-
-        HttpClient client = HttpClient.newHttpClient();
-
         String db_url = dotenv.get(DB_URL);
         String cliente_prefix = dotenv.get(URI_CLIENT);
         String url = db_url.concat(cliente_prefix) + id;
 
+        HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(url))
         .GET()
@@ -85,5 +81,98 @@ public class ClienteRepository {
         }
 
         return cliente;
+    }
+
+    public void deleteCliente(int id) throws Exception{
+        String db_url = dotenv.get(DB_URL);
+        String cliente_prefix = dotenv.get(URI_CLIENT);
+        String url = db_url.concat(cliente_prefix) + id;
+
+        // Cria uma instância de HttpClient
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder() 
+                .uri(URI.create(url))
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if(response.statusCode() != 200)
+            throw new Exception("Erro ao tentar se conectar com o Bando de Dados");    
+    }
+
+    public Cliente save(Cliente cliente) throws Exception{
+        String db_url = dotenv.get(DB_URL);
+        String cliente_prefix = dotenv.get(URI_NEW);
+        String url = db_url.concat(cliente_prefix);
+        System.out.println(url);
+
+        // Cria uma instância de HttpClient
+        HttpClient client = HttpClient.newHttpClient();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        cliente.setId(-1);
+        String body = objectMapper.writeValueAsString(cliente);
+        System.out.println(body);
+
+        // Cria uma solicitação GET
+        HttpRequest request = HttpRequest.newBuilder() 
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .POST(BodyPublishers.ofString(body))
+                .build();
+
+        Cliente clienteResponse = null;
+        try{
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            System.out.println("Statuscode: " + response.statusCode());
+            if(response.statusCode() != 201){
+                System.out.println(response.body());
+                throw new Exception("Cliente não criado");
+            }
+            clienteResponse = objectMapper.readValue(response.body(), Cliente.class);
+            System.out.println(response.body());
+
+        }catch (JsonParseException e) {
+            return null;
+        }
+        return clienteResponse;
+    }
+
+    public Cliente updateCliente(int id, Cliente cliente) throws Exception{
+        String db_url = dotenv.get(DB_URL);
+        String cliente_prefix = dotenv.get(URI_CLIENT);
+        String url = db_url.concat(cliente_prefix) + id;
+        System.out.println(url);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String body = objectMapper.writeValueAsString(cliente);
+
+        // Cria uma instância de HttpClient
+        HttpClient client = HttpClient.newHttpClient();
+        // Cria uma solicitação GET
+        HttpRequest request = HttpRequest.newBuilder() 
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .PUT(BodyPublishers.ofString(body))
+                .build();
+
+        Cliente clienteResponse = null;
+        try{
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            
+            System.out.println("Statuscode: " + response.statusCode());
+            if(response.statusCode() != 200){
+                System.out.println(response.body());
+                throw new Exception("Erro ao se conectar com o Bando de Dados");
+            }
+            System.out.println(response.body());
+            clienteResponse = objectMapper.readValue(response.body(), Cliente.class);
+            System.out.println(clienteResponse);
+        }catch (JsonParseException e) {
+            return null;
+        }
+        return clienteResponse;
     }
 }
