@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oteasy.ot_billing.dto.ClienteDTO;
 import com.oteasy.ot_billing.model.Cliente;
 import com.oteasy.ot_billing.util.ClienteWrapper;
 
@@ -30,7 +29,7 @@ public class ClienteRepository {
     private final String URI_LIST = "URL.CLIENT.LIST";
     private final String URI_NEW = "URL.CLIENT.NEW";
 
-    public List<ClienteDTO> findAll() throws IOException, InterruptedException{
+    public List<Cliente> findAll() throws IOException, InterruptedException{
         String db_url = dotenv.get(DB_URL);
         String list_sufix = dotenv.get(URI_LIST);
         String url = db_url.concat(list_sufix);

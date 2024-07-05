@@ -1,13 +1,18 @@
 package com.oteasy.ot_billing.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
 @Getter
 @Setter
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
 public class Viagem {
     private int id;
     private long data;
@@ -19,5 +24,4 @@ public class Viagem {
     private int cliente_id;
     private String observacao;
     private int num_ajudante;
-
 }

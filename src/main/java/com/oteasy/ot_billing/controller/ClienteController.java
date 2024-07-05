@@ -1,6 +1,7 @@
 package com.oteasy.ot_billing.controller;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.oteasy.ot_billing.repository.ClienteRepository;
-import com.oteasy.ot_billing.dto.ClienteDTO;
+import com.oteasy.ot_billing.config.service.ClienteService;
 import com.oteasy.ot_billing.model.Cliente;
 
 @RestController
@@ -23,46 +23,44 @@ import com.oteasy.ot_billing.model.Cliente;
 public class ClienteController {
 
     @Autowired
-    ClienteRepository clienteRepository;
+    ClienteService clienteService;
 
     @GetMapping("list")
     public ResponseEntity<?> listCliente(){
-        ArrayList<ClienteDTO> clientes;
+        ArrayList<Cliente> clientes;
         try{
-            clientes = (ArrayList<ClienteDTO>) clienteRepository.findAll();
+            clientes = (ArrayList<Cliente>) clienteService.findAllClientes();
+            return new ResponseEntity<ArrayList<Cliente>>(clientes, HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<ArrayList<ClienteDTO>>(clientes, HttpStatus.OK);
     }
 
     @GetMapping("{id}")
     public ResponseEntity<?> getClienteById(@PathVariable int id){
-        Cliente cliente;
-        try{
-            cliente = clienteRepository.findById(id);
-            if(cliente == null || cliente.getId() < 1)
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }catch(Exception e){
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            Optional<Cliente> cliente = clienteService.findClienteById(id);
+            return cliente.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<Cliente>(cliente, HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteCliente(@PathVariable int id){
         try{
-            clienteRepository.deleteCliente(id);
+            clienteService.deleteCliente(id);
+            return new ResponseEntity<String>("Cliente deletado com sucesso!", HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
         }
-        return new ResponseEntity<String>("Cliente deletado com sucesso!", HttpStatus.OK);
     }
 
-    @PostMapping("new")
+    @PostMapping
     public ResponseEntity<?> createCliente(@RequestBody Cliente cliente){
         try{
-            Cliente newCliente = clienteRepository.save(cliente);
+            Cliente newCliente = clienteService.createCliente(cliente);
             return new ResponseEntity<Cliente>(newCliente, HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -72,7 +70,7 @@ public class ClienteController {
     @PutMapping("{id}")
     public ResponseEntity<?> updateCliente(@PathVariable int id, @RequestBody Cliente cliente){
         try{
-            Cliente updatedCliente = clienteRepository.updateCliente(id, cliente);
+            Cliente updatedCliente = clienteService.updateCliente(id, cliente);
             return new ResponseEntity<>(updatedCliente, HttpStatus.OK);
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

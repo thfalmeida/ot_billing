@@ -1,21 +1,21 @@
 package com.oteasy.ot_billing.repository;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Optional;
 import java.net.http.HttpRequest.BodyPublishers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oteasy.ot_billing.dto.CarroDTO;
 import com.oteasy.ot_billing.model.Carro;
 import com.oteasy.ot_billing.util.CarroWrapper;
+import com.oteasy.ot_billing.util.ResourceNotFoundException;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -29,7 +29,7 @@ public class CarroRepository {
     private final String URI_LIST = "URL.CAR.LIST";
     private final String URI_NEW = "URL.CAR.NEW";
 
-    public Carro findById(int id) throws Exception{
+    public Optional<Carro> findById(int id){
         String db_url = dotenv.get(DB_URL);
         String car_sufix = dotenv.get(URI_CAR);
         String url = db_url.concat(car_sufix) + id;
@@ -46,21 +46,24 @@ public class CarroRepository {
         try{
             Carro carro = null;
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() != 200)
+                throw new ResourceNotFoundException("Carro não encontrado");
+
             ObjectMapper objectMapper = new ObjectMapper();
             carro = objectMapper.readValue(response.body(), Carro.class);
-            return carro;
-        }catch (JsonParseException e) {
+            Optional<Carro> optCarro = Optional.ofNullable(carro);
+            return optCarro;
+        }catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador");
+            return Optional.ofNullable(null);
         }
     }
 
-    public List<CarroDTO> findAll() throws Exception{
+    public List<CarroDTO> findAll(){
         String db_url = dotenv.get(DB_URL);
         String list_sufix = dotenv.get(URI_LIST);
         String url = db_url.concat(list_sufix);
 
-        System.out.println(url);
          // Cria uma instância de HttpClient
         HttpClient client = HttpClient.newHttpClient();
 
@@ -75,13 +78,12 @@ public class CarroRepository {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             CarroWrapper carros = objectMapper.readValue(response.body(), CarroWrapper.class);
             return carros.getItems();
-        }catch (JsonParseException e) {
-            System.out.println(e.getMessage());
-            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador");
+        }catch (Exception e) {
+            return null;
         }
     }
 
-    public Carro save(Carro carro) throws Exception{
+    public Carro save(Carro carro){
         String db_url = dotenv.get(DB_URL);
         String new_sufix = dotenv.get(URI_NEW);
         String url = db_url.concat(new_sufix);
@@ -91,35 +93,36 @@ public class CarroRepository {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        carro.setId(-1);
-        String body = objectMapper.writeValueAsString(carro);
-
-        // Cria uma solicitação GET
-        HttpRequest request = HttpRequest.newBuilder() 
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .POST(BodyPublishers.ofString(body))
-                .build();
-
-        Carro carroResponse = null;
         try{
+            carro.setId(-1);
+            String body = objectMapper.writeValueAsString(carro);
+
+            // Cria uma solicitação GET
+            HttpRequest request = HttpRequest.newBuilder() 
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .POST(BodyPublishers.ofString(body))
+                    .build();
+
+            Carro carroResponse = null;
+        
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             
             System.out.println("Statuscode: " + response.statusCode());
             if(response.statusCode() != 201){
                 System.out.println(response.body());
-                throw new Exception("Carro não criado");
+                throw new Exception("Erro ao conectar com o banco de dados");
             }
             carroResponse = objectMapper.readValue(response.body(), Carro.class);
+            return carroResponse;
 
-        }catch (JsonParseException e) {
+        }catch (Exception e) {
+
             return null;
         }
-        return carroResponse;
-
     }
 
-    public void delete(int id) throws Exception{
+    public void delete(int id){
         String db_url = dotenv.get(DB_URL);
         String car_sufix = dotenv.get(URI_CAR);
         String url = db_url.concat(car_sufix) + id;
@@ -131,33 +134,40 @@ public class CarroRepository {
                 .DELETE()
                 .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if(response.statusCode() != 200)
-            throw new Exception("Carro não encontrado");    
+        try{
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if(response.statusCode() != 200 || response.statusCode() != 201)
+                throw new Exception("Erro ao se conectar com o banco de dados");
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+         
     }
 
-    public Carro updateMotorista(int id, Carro carro) throws IOException, InterruptedException{
+    public Carro updateCarro(int id, Carro carro){
         String db_url = dotenv.get(DB_URL);
         String driver_sufix = dotenv.get(URI_CAR);
         String url = db_url.concat(driver_sufix) + id;
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String body = objectMapper.writeValueAsString(carro);
+        try{
+            String body = objectMapper.writeValueAsString(carro);
+            HttpClient client = HttpClient.newHttpClient();
 
-        HttpClient client = HttpClient.newHttpClient();
-
-        // Cria uma solicitação GET
-        HttpRequest request = HttpRequest.newBuilder() 
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .PUT(BodyPublishers.ofString(body))
-                .build();
-        
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Carro carroResponse = null;
-        carroResponse = objectMapper.readValue(response.body(), Carro.class);
-
-        return carroResponse;
+            // Cria uma solicitação GET
+            HttpRequest request = HttpRequest.newBuilder() 
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .PUT(BodyPublishers.ofString(body))
+                    .build();
+            
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            Carro carroResponse = null;
+            carroResponse = objectMapper.readValue(response.body(), Carro.class);
+            return carroResponse;
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
-
 }

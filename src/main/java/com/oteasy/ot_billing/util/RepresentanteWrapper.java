@@ -3,7 +3,7 @@ package com.oteasy.ot_billing.util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
-import com.oteasy.ot_billing.dto.RepresentanteDTO;
+import com.oteasy.ot_billing.model.Representante;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RepresentanteWrapper {
-    List<RepresentanteDTO> items;
+    List<Representante> items;
 }

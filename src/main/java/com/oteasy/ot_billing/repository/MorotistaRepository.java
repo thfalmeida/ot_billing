@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.oteasy.ot_billing.model.Motorista;
-import com.oteasy.ot_billing.dto.*;
 import com.oteasy.ot_billing.util.MotoristaWrapper;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -30,7 +30,7 @@ public class MorotistaRepository {
     private final String URI_LIST = "URL.DRIVER.LIST";
     private final String URI_NEW = "URL.DRIVER.NEW";
 
-    public Motorista findById(int id) throws IOException, InterruptedException{
+    public Optional<Motorista> findById(int id) throws IOException, InterruptedException{
         String db_url = dotenv.get(DB_URL);
         String driver_sufix = dotenv.get(URI_DRIVER);
         String url = db_url.concat(driver_sufix);
@@ -45,17 +45,17 @@ public class MorotistaRepository {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         ObjectMapper objectMapper = new ObjectMapper();
-        Motorista motorista = null;
         try{
-            motorista = objectMapper.readValue(response.body(), Motorista.class);
+            Motorista motorista = objectMapper.readValue(response.body(), Motorista.class);
+            Optional<Motorista> optMotorista = Optional.ofNullable(motorista);
+            return optMotorista;
         }catch (JsonParseException e) {
-            return null;
+            Optional<Motorista> optMotorista = Optional.ofNullable(null);
+            return optMotorista;
         }
-
-        return motorista;
     }
 
-    public List<MotoristaDTO> listAll() throws Exception{
+    public List<Motorista> listAll() throws Exception{
         //Constroi a URL
         String db_url = dotenv.get(DB_URL);
         String list_sufix = dotenv.get(URI_LIST);
@@ -73,7 +73,6 @@ public class MorotistaRepository {
         ObjectMapper objectMapper = new ObjectMapper();
         try{
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("Statuscode: " + response.statusCode());
             MotoristaWrapper wrapper = objectMapper.readValue(response.body(), MotoristaWrapper.class);
             return wrapper.getItems();
         }catch (JsonParseException e) {

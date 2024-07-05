@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oteasy.ot_billing.dto.ViagemDTO;
 import com.oteasy.ot_billing.model.Viagem;
 import com.oteasy.ot_billing.util.ViagemWrapper;
 
@@ -51,11 +50,11 @@ public class ViagemRepository {
             return viagem;
         }catch (JsonParseException e) {
             System.out.println(e.getMessage());
-            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador");
+            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador: " + e.getMessage());
         }
     }
 
-    public List<ViagemDTO> findAll() throws Exception{
+    public List<Viagem> findAll() throws Exception{
         String db_url = dotenv.get(DB_URL);
         String list_sufix = dotenv.get(URI_LIST);
         String url = db_url.concat(list_sufix);
@@ -77,7 +76,7 @@ public class ViagemRepository {
             return transportes.getItems();
         }catch (JsonParseException e) {
             System.out.println(e.getMessage());
-            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador");
+            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador" + e.getMessage());
         }
     }
 
@@ -100,21 +99,20 @@ public class ViagemRepository {
                 .header("Content-Type", "application/json")
                 .POST(BodyPublishers.ofString(body))
                 .build();
-
+        System.out.println(body);
         try{
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             
             System.out.println("Statuscode: " + response.statusCode());
             if(response.statusCode() != 201){
                 System.out.println(response.body());
-                throw new Exception("Viagem não criada");
+                throw new Exception("Viagem não criada: " + response.body());
             }
-            Viagem viagemResponse = null;
-            viagemResponse = objectMapper.readValue(response.body(), Viagem.class);
+            Viagem viagemResponse = objectMapper.readValue(response.body(), Viagem.class);
             return viagemResponse;
         }catch (JsonParseException e) {
             System.out.println(e.getMessage());
-            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador");
+            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador: "+ e.getMessage());
         }
     }
 
@@ -132,7 +130,7 @@ public class ViagemRepository {
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if(response.statusCode() != 200)
-            throw new Exception("Viagem não encontrada");    
+            throw new Exception("Viagem não encontrada: " + response.body());    
     }
 
     public Viagem update(int id, Viagem viagem) throws Exception{
@@ -160,7 +158,7 @@ public class ViagemRepository {
         return viagemResponse;
         } catch (JsonParseException e) {
             System.out.println(e.getMessage());
-            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador");
+            throw new Exception("Erro durante a comunicação com o Banco de Dados. Contate o administrador: " + e.getMessage());
         }
     }
 }

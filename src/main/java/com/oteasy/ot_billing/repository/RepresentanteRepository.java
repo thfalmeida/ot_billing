@@ -13,7 +13,6 @@ import java.net.http.HttpRequest.BodyPublishers;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oteasy.ot_billing.dto.RepresentanteDTO;
 import com.oteasy.ot_billing.model.Representante;
 import com.oteasy.ot_billing.util.RepresentanteWrapper;
 
@@ -55,7 +54,7 @@ public class RepresentanteRepository {
         }
     }
 
-    public List<RepresentanteDTO> findAll() throws Exception{
+    public List<Representante> findAll() throws Exception{
         String db_url = dotenv.get(DB_URL);
         String list_sufix = dotenv.get(URI_LIST);
         String url = db_url.concat(list_sufix);
@@ -135,7 +134,7 @@ public class RepresentanteRepository {
             throw new Exception("Representante não encontrado");    
     }
 
-    public Representante updateMotorista(int id, Representante representante) throws IOException, InterruptedException{
+    public Representante update(int id, Representante representante) throws IOException, InterruptedException{
         String db_url = dotenv.get(DB_URL);
         String url_sufix = dotenv.get(URI_AGENT);
         String url = db_url.concat(url_sufix) + id;
