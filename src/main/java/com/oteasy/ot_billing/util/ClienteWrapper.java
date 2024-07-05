@@ -1,18 +1,18 @@
-package com.oteasy.ot_billing.dto;
+
+package com.oteasy.ot_billing.util;
+
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.oteasy.ot_billing.model.Cliente;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-@AllArgsConstructor
-@Data
 @NoArgsConstructor
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CarroDTO {
-    private int id;
-    private String nome;
+public class ClienteWrapper {
+    ArrayList<Cliente> items;
 
 }
