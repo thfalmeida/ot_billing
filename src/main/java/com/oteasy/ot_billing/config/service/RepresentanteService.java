@@ -1,9 +1,8 @@
 package com.oteasy.ot_billing.config.service;
 
-import java.util.Optional;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.oteasy.ot_billing.model.Representante;
@@ -15,36 +14,60 @@ public class RepresentanteService {
     @Autowired
     RepresentanteRepository representanteRepository;
 
-    public Optional<Representante> findRepresentanteById(int id) throws Exception{
-        return Optional.ofNullable(representanteRepository.findById(id));
+    public ResponseEntity<?>  findRepresentanteById(int id){
+        try{
+            Representante representante = representanteRepository.findById(id);
+            return new ResponseEntity<>(representante, HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    public List<Representante> findAllRepresentantes() throws Exception {
-        return representanteRepository.findAll();
+    public ResponseEntity<?>  findAllRepresentantes(){
+        try{
+            return new ResponseEntity<>(representanteRepository.findAll(), HttpStatus.OK);  
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    public void deleteRepresentante(int id) throws Exception{
-        Optional<Representante> representante = findRepresentanteById(id);
-        if(representante.isPresent())
+    public ResponseEntity<?> deleteRepresentante(int id){
+        try{
+            Representante representante = representanteRepository.findById(id);
+            if(representante == null || representante.getId() < 1)
+                return new ResponseEntity<>("Representante não encontado", HttpStatus.BAD_REQUEST);
+
             representanteRepository.delete(id);
-        else
-            throw new Exception("Representante não encontrado");
-    }
-
-    public Representante updateRepresentante(int id, Representante representante) throws Exception{
-        Optional<Representante> existingRepresentante = findRepresentanteById(id);
-        if(existingRepresentante.isPresent()) {
-            return representanteRepository.update(id, representante);
-        } else {
-            throw new Exception("Cliente não encontrado");
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public Representante createRepresentante(Representante representante) throws Exception {
-        if(representante == null || representante.getNome() == null || representante.getNome().isEmpty()) {
-            throw new Exception("Dados inválidos para criação do cliente");
+    public ResponseEntity<?> updateRepresentante(int id, Representante representante){
+        try{
+            Representante representanteUpdated = representanteRepository.update(id, representante);
+            if (representanteUpdated != null && representanteUpdated.getId() > 0) {
+                return new ResponseEntity<Representante>(representanteUpdated, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return representanteRepository.save(representante);
+    }
+
+    public ResponseEntity<?> createRepresentante(Representante representante){
+        if(representante == null || representante.getNome() == null || representante.getNome().isEmpty())
+            return new ResponseEntity<String>("Dados inválidos para criação do cliente", HttpStatus.BAD_REQUEST);
+        
+        try{
+            Representante newRepresentante = representanteRepository.save(representante);
+            return new ResponseEntity<>(newRepresentante, HttpStatus.OK);
+
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

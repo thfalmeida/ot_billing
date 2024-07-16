@@ -1,10 +1,11 @@
 package com.oteasy.ot_billing.config.service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.oteasy.ot_billing.model.Motorista;
@@ -16,36 +17,61 @@ public class MotoristaService {
     @Autowired
     MorotistaRepository motoristaRepository;
 
-    public List<Motorista> findAllMotoristas() throws Exception{
-        return motoristaRepository.listAll();
+    public ResponseEntity<?> findAllMotoristas(){
+        try{
+            return new ResponseEntity<List<Motorista>>(motoristaRepository.listAll(), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        
+        
     }
 
-    public Optional<Motorista> findMotoristaById(int id) throws IOException, InterruptedException{
-        return motoristaRepository.findById(id);
-    }
-
-    public void deleteMotorista(int id) throws Exception {
-        Optional<Motorista> cliente = findMotoristaById(id);
-        if(cliente.isPresent()) {
-            motoristaRepository.deleteMotorista(id);
-        } else {
-            throw new Exception("Motorista não encontrado");
+    public ResponseEntity<?> findMotoristaById(int id){
+        try{
+            return new ResponseEntity<>(motoristaRepository.findById(id), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public Motorista createMotorista(Motorista motorista) throws Exception {
+    public ResponseEntity<?> deleteMotorista(int id){
+        try{
+            Optional<Motorista> motorista = motoristaRepository.findById(id);
+            if(motorista.isPresent() && motorista.get().getId() > 0){
+                motoristaRepository.deleteMotorista(id);
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+            else
+                return new ResponseEntity<>("Motorista não encontrado", HttpStatus.BAD_REQUEST);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> createMotorista(Motorista motorista){
         if(motorista == null || motorista.getNome() == null || motorista.getTelefone() == null) {
-            throw new Exception("Dados inválidos para criação do motorista");
+            return new ResponseEntity<>("Dados inválidos para criação do motorista", HttpStatus.BAD_REQUEST);
         }
-        return motoristaRepository.save(motorista);
+
+        try{
+            Motorista newMotorista = motoristaRepository.save(motorista);
+            return new ResponseEntity<>(newMotorista, HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    public Motorista updateMotorista(int id, Motorista motorista) throws Exception {
-        Optional<Motorista> existingMotorista = findMotoristaById(id);
-        if(existingMotorista.isPresent()) {
-            return motoristaRepository.updateMotorista(id, motorista);
-        } else {
-            throw new Exception("Motorista não encontrado");
+    public ResponseEntity<?> updateMotorista(int id, Motorista motorista){
+        try{
+            Optional<Motorista> existingMotorista = motoristaRepository.findById(id);
+            if(!existingMotorista.isPresent()) 
+                return new ResponseEntity<>("Motorista não encontrado", HttpStatus.BAD_REQUEST);
+
+            Motorista updatedMotorista = motoristaRepository.updateMotorista(id, motorista);
+            return new ResponseEntity<>(updatedMotorista, HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
