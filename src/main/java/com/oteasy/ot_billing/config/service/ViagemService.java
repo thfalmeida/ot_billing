@@ -1,9 +1,8 @@
 package com.oteasy.ot_billing.config.service;
 
-import java.util.Optional;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.oteasy.ot_billing.model.Viagem;
@@ -15,34 +14,50 @@ public class ViagemService {
     @Autowired
     ViagemRepository viagemRepository;
 
-    public Optional<Viagem> findViagemById(int id) throws Exception{
-        Optional<Viagem> viagem = Optional.ofNullable(viagemRepository.findById(id));
-        return viagem;
+    public ResponseEntity<?> findViagemById(int id){
+        try{
+            Viagem viagem = viagemRepository.findById(id);
+            return new ResponseEntity<>(viagem, HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     
-    public List<Viagem> findAllViagens() throws Exception{
-        return viagemRepository.findAll();
+    public ResponseEntity<?> findAllViagens(){
+        try{
+            return new ResponseEntity<>(viagemRepository.findAll(), HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }        
     }
 
-    public void deleteViagem(int id) throws Exception{
-        Optional<Viagem> viagem = findViagemById(id);
-        System.out.println((viagem.isPresent()));
-        if(viagem.isPresent())
+    public ResponseEntity<?> deleteViagem(int id){
+        try{
             viagemRepository.delete(id);
-        else
-            throw new Exception("Viagem não encontrado");
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }   
+        
     }
 
-    public Viagem createViagem(Viagem viagem) throws Exception{
-        return viagemRepository.save(viagem);
+    public ResponseEntity<?> createViagem(Viagem viagem){
+        try{
+            Viagem newViagem = viagemRepository.save(viagem);
+            return new ResponseEntity<>(newViagem, HttpStatus.OK);
+        }catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } 
     }
 
-    public Viagem updateViagem(int id, Viagem viagem) throws Exception{
-        Optional<Viagem> existingViagem = findViagemById(id);
-        if(existingViagem.isPresent())
-            return viagemRepository.update(id, existingViagem.get());
-        else
-            throw new Exception("Viagem não encontrado");
+    public ResponseEntity<?> updateViagem(int id, Viagem viagem){
+        try{
+            Viagem viagemUpdated = viagemRepository.update(id, viagem);
+            return new ResponseEntity<>(viagemUpdated, HttpStatus.OK);
+        }
+        catch(Exception e){
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     
 }
