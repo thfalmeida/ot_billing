@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.oteasy.ot_billing.model.Motorista;
-import com.oteasy.ot_billing.config.service.MotoristaService;
+import com.oteasy.ot_billing.service.MotoristaService;
 
 @RestController
 @RequestMapping("driver")

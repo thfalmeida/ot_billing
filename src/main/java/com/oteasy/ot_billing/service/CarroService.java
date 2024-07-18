@@ -1,4 +1,4 @@
-package com.oteasy.ot_billing.config.service;
+package com.oteasy.ot_billing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

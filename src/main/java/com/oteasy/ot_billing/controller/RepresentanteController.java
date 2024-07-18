@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.oteasy.ot_billing.config.service.RepresentanteService;
+import com.oteasy.ot_billing.service.RepresentanteService;
 import com.oteasy.ot_billing.model.Representante;
 
 @Controller

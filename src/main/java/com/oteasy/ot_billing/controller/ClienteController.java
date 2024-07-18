@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.oteasy.ot_billing.config.service.ClienteService;
+import com.oteasy.ot_billing.service.ClienteService;
 import com.oteasy.ot_billing.model.Cliente;
 
 @RestController
