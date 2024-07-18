@@ -1,4 +1,4 @@
-package com.oteasy.ot_billing.config.service;
+package com.oteasy.ot_billing.service;
 
 import java.util.List;
 import java.util.Optional;
