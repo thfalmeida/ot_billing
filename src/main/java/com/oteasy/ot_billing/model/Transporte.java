@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
-public class Transporte {
+public class Transporte implements ObjectModel {
     private int id;
     private int viagem_id;
     private String numTransporte;

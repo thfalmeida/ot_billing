@@ -5,55 +5,73 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.oteasy.ot_billing.dto.CarroDTO;
 import com.oteasy.ot_billing.model.Carro;
-import com.oteasy.ot_billing.repository.CarroRepository;
+import com.oteasy.ot_billing.model.ObjectModel;
+import com.oteasy.ot_billing.repository.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CarroService {
 
     @Autowired
-    private CarroRepository carroRepository;
+    private Repository repository;
 
-    public ResponseEntity<?> getAllCars() {
+        public ResponseEntity<?> findAllCarros(){
         try{
-            List<CarroDTO> lista = carroRepository.findAll();
-            return new ResponseEntity<List<CarroDTO>>(lista, HttpStatus.OK);
+            List<ObjectModel> lista = repository.FindAll(Carro.class);
+            return new ResponseEntity<>(lista, HttpStatus.OK);
+        }catch(Exception e){
+            System.out.println(e.toString());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> findCarroById(int id){
+        try{
+            Carro Carro =  (Carro) repository.findById(id, Carro.class);
+                if(Carro != null)
+                    return new ResponseEntity<Carro>(Carro, HttpStatus.OK);
+                else
+                    return new ResponseEntity<String>("Carro não encontrado", HttpStatus.NOT_FOUND);
+        }catch(Exception e){
+            System.out.println(e.toString());
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<String> deleteCarro(int id) {
+        try{
+            Carro carro = (Carro) repository.findById(id, Carro.class);
+            if(carro != null && carro.getId() > 0){
+                repository.delete(id, Carro.class);
+                return new ResponseEntity<String>(HttpStatus.OK);
+            }else
+                return new ResponseEntity<String>("Carro não encontrado", HttpStatus.NOT_FOUND);
         }catch(Exception e){
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
+
     }
 
-    public ResponseEntity<?> getCarById(int id) {
-        Optional<Carro> carro = carroRepository.findById(id);
-        if (carro.isPresent()) {
-            return ResponseEntity.ok(carro.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    public ResponseEntity<Carro> createCar(Carro car){
-        return ResponseEntity.ok(carroRepository.save(car)); 
-    }
-
-    public ResponseEntity<Carro> updateCar(int id, Carro carDetails) {
-        Carro carro = carroRepository.updateCarro(id, carDetails);
-        if (carro != null) {
-            return new ResponseEntity<Carro>(carro, HttpStatus.OK);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    public ResponseEntity<?> deleteCar(int id) {
+    public ResponseEntity<?> createCarro(Carro carro){
         try{
-            carroRepository.delete(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            Carro newCarro = (Carro) repository.save(carro, Carro.class);
+            return new ResponseEntity<Carro>(newCarro,HttpStatus.OK);
+        }catch(Exception e ){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> updateCarro(int id, Carro carro)  {
+        try{
+            Carro existingCarro = (Carro) repository.findById(id, Carro.class);
+            if(existingCarro != null && existingCarro.getId() > 0) {
+                Carro updatedCarro = (Carro) repository.save(id, carro, Carro.class);
+                return new ResponseEntity<Carro>(updatedCarro, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<String>("Carro não encontrado", HttpStatus.NOT_FOUND);
+            }
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

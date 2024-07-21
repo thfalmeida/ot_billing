@@ -1,7 +1,6 @@
 package com.oteasy.ot_billing.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,69 +8,74 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.oteasy.ot_billing.model.Motorista;
-import com.oteasy.ot_billing.repository.MorotistaRepository;
+import com.oteasy.ot_billing.model.ObjectModel;
+import com.oteasy.ot_billing.repository.Repository;
 
 @Service
 public class MotoristaService {
 
     @Autowired
-    MorotistaRepository motoristaRepository;
+    Repository repository;
 
     public ResponseEntity<?> findAllMotoristas(){
         try{
-            return new ResponseEntity<List<Motorista>>(motoristaRepository.listAll(), HttpStatus.OK);
+            List<ObjectModel> lista = repository.FindAll(Motorista.class);
+            return new ResponseEntity<>(lista, HttpStatus.OK);
         }catch(Exception e){
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            System.out.println(e.toString());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
-        
     }
 
     public ResponseEntity<?> findMotoristaById(int id){
         try{
-            return new ResponseEntity<>(motoristaRepository.findById(id), HttpStatus.OK);
+            Motorista motorista =  (Motorista) repository.findById(id, Motorista.class);
+                if(motorista != null)
+                    return new ResponseEntity<Motorista>(motorista, HttpStatus.OK);
+                else
+                    return new ResponseEntity<String>("Motorista não encontrado", HttpStatus.NOT_FOUND);
         }catch(Exception e){
+            System.out.println(e.toString());
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<?> deleteMotorista(int id){
+    public ResponseEntity<String> deleteMotorista(int id) {
         try{
-            Optional<Motorista> motorista = motoristaRepository.findById(id);
-            if(motorista.isPresent() && motorista.get().getId() > 0){
-                motoristaRepository.deleteMotorista(id);
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
-            else
-                return new ResponseEntity<>("Motorista não encontrado", HttpStatus.BAD_REQUEST);
+            Motorista motorista = (Motorista) repository.findById(id, Motorista.class);
+            if(motorista != null && motorista.getId() > 0){
+                repository.delete(id, Motorista.class);
+                return new ResponseEntity<String>(HttpStatus.OK);
+            }else
+                return new ResponseEntity<String>("Motorista não encontrado", HttpStatus.NOT_FOUND);
         }catch(Exception e){
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 
     public ResponseEntity<?> createMotorista(Motorista motorista){
-        if(motorista == null || motorista.getNome() == null || motorista.getTelefone() == null) {
-            return new ResponseEntity<>("Dados inválidos para criação do motorista", HttpStatus.BAD_REQUEST);
-        }
-
         try{
-            Motorista newMotorista = motoristaRepository.save(motorista);
-            return new ResponseEntity<>(newMotorista, HttpStatus.OK);
-        }catch(Exception e){
+            Motorista newMotorista = (Motorista) repository.save(motorista, Motorista.class);
+            return new ResponseEntity<Motorista>(newMotorista,HttpStatus.OK);
+        }catch(Exception e ){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public ResponseEntity<?> updateMotorista(int id, Motorista motorista){
+    public ResponseEntity<?> updateMotorista(int id, Motorista motorista)  {
         try{
-            Optional<Motorista> existingMotorista = motoristaRepository.findById(id);
-            if(!existingMotorista.isPresent()) 
-                return new ResponseEntity<>("Motorista não encontrado", HttpStatus.BAD_REQUEST);
-
-            Motorista updatedMotorista = motoristaRepository.updateMotorista(id, motorista);
-            return new ResponseEntity<>(updatedMotorista, HttpStatus.OK);
+            Motorista existingMotorista = (Motorista) repository.findById(id, Motorista.class);
+            if(existingMotorista != null && existingMotorista.getId() > 0) {
+                Motorista updatedMotorista = (Motorista) repository.save(id, motorista, Motorista.class);
+                return new ResponseEntity<Motorista>(updatedMotorista, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<String>("Motorista não encontrado", HttpStatus.NOT_FOUND);
+            }
         }catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
+
+   

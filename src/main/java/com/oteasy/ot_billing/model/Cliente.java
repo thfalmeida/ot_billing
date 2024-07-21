@@ -12,9 +12,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Cliente {
+public class Cliente implements ObjectModel{
     private int id;
     private String nome;
     private String endereco;
     private String tipo;
+
 }

@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Representante {
+public class Representante implements ObjectModel {
     private int id;
     private String nome;
     private int empresa_id;
