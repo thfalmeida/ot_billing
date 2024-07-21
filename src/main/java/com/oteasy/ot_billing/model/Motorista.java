@@ -15,7 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Motorista {
+public class Motorista implements ObjectModel {
     private int id;
     @NonNull
     private String nome;

@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
-public class Viagem {
+public class Viagem implements ObjectModel {
     private int id;
     private long data;
     private long km_inicial;

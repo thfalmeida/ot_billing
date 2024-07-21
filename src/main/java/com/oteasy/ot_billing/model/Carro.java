@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Carro {
+public class Carro implements ObjectModel{
     private int id;
     private String nome;
     private String placa;
