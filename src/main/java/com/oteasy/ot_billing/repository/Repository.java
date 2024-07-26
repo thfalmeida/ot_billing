@@ -16,6 +16,7 @@ import com.oteasy.ot_billing.model.ObjectModel;
 import com.oteasy.ot_billing.model.Representante;
 import com.oteasy.ot_billing.model.Transporte;
 import com.oteasy.ot_billing.model.Viagem;
+import com.oteasy.ot_billing.model.ViagemInfo;
 import com.oteasy.ot_billing.util.HttpMethod;
 import com.oteasy.ot_billing.util.HttpRequester;
 
@@ -35,6 +36,7 @@ public class Repository {
     private final String URL_CAR = "URL.CAR";
     private final String URL_CLIENT = "URL.CLIENT";
     private final String URL_TRIP = "URL.TRIP";
+    private final String URL_INFOTRIP = "URL.INFOTRIP";
     private final String URL_AGENT = "URL.AGENT";
     
    
@@ -42,7 +44,6 @@ public class Repository {
         ObjectMapper objectMapper = new ObjectMapper();
 
         String uri = buildURI(classType).concat(dotenv.get(URL_LIST));
-        System.out.println(uri);
         HttpResponse<String> response = httpRequester.SendRequest(uri, HttpMethod.GET);
 
         JsonNode rootNode = objectMapper.readTree(response.body());
@@ -55,21 +56,21 @@ public class Repository {
 
     public <T> ObjectModel findById(int id, Class<T> classType) throws IOException, InterruptedException{
         String uri = buildURI(classType) + id;
-
+        System.out.println(uri);
+        System.out.println("Procurando objeto no banco de dados");
         HttpResponse<String> response = httpRequester.SendRequest(uri, HttpMethod.GET);
-        System.out.println(response);
+        // System.out.println(response.body());
         ObjectMapper objectMapper = new ObjectMapper();
 
         return (ObjectModel) objectMapper.readValue(response.body(), classType);
     }
 
     public <T> ObjectModel save(int id, ObjectModel obj,Class<T> classType) throws IOException, InterruptedException{
-        System.out.println(obj.getClass() == classType);
         String url = buildURI(classType) + id;
 
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(obj); 
-        HttpResponse<String> response = httpRequester.SendRequest(url, HttpMethod.POST, body);
+        HttpResponse<String> response = httpRequester.SendRequest(url, HttpMethod.PUT, body);
         return (ObjectModel) objectMapper.readValue(response.body(), classType);
     }
 
@@ -80,12 +81,13 @@ public class Repository {
     }
 
     public <T> ObjectModel save(ObjectModel obj, Class<T> classType) throws IOException, InterruptedException{
-        System.out.println(obj.getClass() == classType);
         String url = buildURI(classType).concat(dotenv.get(URL_NEW));
 
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(obj); 
+        
         HttpResponse<String> response = httpRequester.SendRequest(url, HttpMethod.POST, body);
+        System.out.println(url + " " + body);
         return (ObjectModel) objectMapper.readValue(response.body(), classType);
     }
 
@@ -104,6 +106,10 @@ public class Repository {
         }
         else if(classType.isAssignableFrom(Viagem.class)){
             path = dotenv.get(URL_TRIP);
+            return db_url.concat(path);
+        }
+        else if(classType.isAssignableFrom(ViagemInfo.class)){
+            path = dotenv.get(URL_INFOTRIP);
             return db_url.concat(path);
         }
         else if(classType.isAssignableFrom(Representante.class)){

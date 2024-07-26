@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.oteasy.ot_billing.model.ObjectModel;
 import com.oteasy.ot_billing.model.Viagem;
+import com.oteasy.ot_billing.model.ViagemInfo;
 import com.oteasy.ot_billing.repository.Repository;
 
 @Service
@@ -34,6 +35,29 @@ public class ViagemService {
                     return new ResponseEntity<Viagem>(viagem, HttpStatus.OK);
                 else
                     return new ResponseEntity<String>("Viagem não encontrado", HttpStatus.NOT_FOUND);
+        }catch(Exception e){
+            System.out.println(e.toString());
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> findViagemInfoById(int id){
+        try{
+            ViagemInfo viagem = (ViagemInfo) repository.findById(id, ViagemInfo.class);
+                if(viagem != null)
+                    return new ResponseEntity<ViagemInfo>(viagem, HttpStatus.OK);
+                else
+                    return new ResponseEntity<String>("Viagem não encontrada", HttpStatus.NOT_FOUND);
+        }catch(Exception e){
+            System.out.println(e.toString());
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<?> findAllViagensInfo(){
+        try{
+            List<ObjectModel> lista = repository.FindAll(ViagemInfo.class);
+            return new ResponseEntity<List<ObjectModel>>(lista, HttpStatus.OK);
         }catch(Exception e){
             System.out.println(e.toString());
             return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

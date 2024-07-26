@@ -36,7 +36,7 @@ public class ClienteController {
         return clienteService.deleteCliente(id);
     }
 
-    @PostMapping
+    @PostMapping("/new")
     public ResponseEntity<?> createCliente(@RequestBody Cliente cliente){
         return clienteService.createCliente(cliente);
     }

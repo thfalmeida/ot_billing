@@ -57,6 +57,7 @@ public class CarroService {
     public ResponseEntity<?> createCarro(Carro carro){
         try{
             Carro newCarro = (Carro) repository.save(carro, Carro.class);
+            System.out.println(carro.getNome() + " "+ carro.getPlaca()); 
             return new ResponseEntity<Carro>(newCarro,HttpStatus.OK);
         }catch(Exception e ){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,9 +65,14 @@ public class CarroService {
     }
 
     public ResponseEntity<?> updateCarro(int id, Carro carro)  {
+        System.out.println("Entrando na chamada de atualziação de carro| id: " + id);
+        System.out.println(carro.getNome() + " - " + carro.getPlaca() );
         try{
+
             Carro existingCarro = (Carro) repository.findById(id, Carro.class);
+            System.out.println("Carro existe. Atualizando carro");
             if(existingCarro != null && existingCarro.getId() > 0) {
+
                 Carro updatedCarro = (Carro) repository.save(id, carro, Carro.class);
                 return new ResponseEntity<Carro>(updatedCarro, HttpStatus.OK);
             } else {
