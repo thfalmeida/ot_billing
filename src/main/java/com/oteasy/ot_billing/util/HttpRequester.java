@@ -23,9 +23,11 @@ public class HttpRequester{
                 break;
             case HttpMethod.POST:
                 requestBuilder.POST(BodyPublishers.ofString(body));
+                requestBuilder.header("Content-Type", "application/json");
                 break;
             case HttpMethod.PUT:
                 requestBuilder.PUT(BodyPublishers.ofString(body));
+                requestBuilder.header("Content-Type", "application/json");
                 break;
             case HttpMethod.DELETE:
                 requestBuilder.DELETE();

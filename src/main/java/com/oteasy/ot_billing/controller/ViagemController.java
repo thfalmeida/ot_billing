@@ -26,9 +26,20 @@ public class ViagemController {
         return viagemService.findViagemById(id);
     }
 
+    @GetMapping("/info/{id}")
+    public ResponseEntity<?> getViagemInfoById(@PathVariable int id){
+        return viagemService.findViagemInfoById(id);
+    }
+
+
     @GetMapping("list")
     public ResponseEntity<?> listViagem(){
         return viagemService.findAllViagens();
+    }
+
+    @GetMapping("/info/list")
+    public ResponseEntity<?> listInfoViagem(){
+        return viagemService.findAllViagensInfo();
     }
 
     @DeleteMapping("{id}")
