@@ -36,7 +36,7 @@ public class RepresentanteController {
         return representanteService.deleteRepresentante(id);
     }
 
-    @PostMapping
+    @PostMapping("/new")
     public ResponseEntity<?> createRepresentante(@RequestBody Representante representante){
         return representanteService.createRepresentante(representante);
     }

@@ -41,7 +41,9 @@ public class RepresentanteService {
 
     public ResponseEntity<String> deleteRepresentante(int id) {
         try{
+            System.out.println(id);
             Representante representante = (Representante) repository.findById(id, Representante.class);
+            System.out.println(representante.getId() + " | " + representante.getNome());
             if(representante != null && representante.getId() > 0){
                 repository.delete(id, Representante.class);
                 return new ResponseEntity<String>(HttpStatus.OK);
@@ -53,11 +55,13 @@ public class RepresentanteService {
 
     }
 
-    public ResponseEntity<?> createRepresentante(Representante Representante){
+    public ResponseEntity<?> createRepresentante(Representante representante){
         try{
-            Representante newRepresentante = (Representante) repository.save(Representante, Representante.class);
+            System.out.println("Salvando representante: " + representante.getNome());
+            Representante newRepresentante = (Representante) repository.save(representante, Representante.class);
             return new ResponseEntity<Representante>(newRepresentante,HttpStatus.OK);
         }catch(Exception e ){
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,9 @@ public class Repository {
     Dotenv dotenv;
     @Autowired
     HttpRequester httpRequester;
+
+    private static final Logger logger = LogManager.getLogger(Repository.class);
+
 
     private final String URL_LIST = "URL.LIST";
     private final String URL_NEW = "URL.NEW";
@@ -56,21 +61,29 @@ public class Repository {
 
     public <T> ObjectModel findById(int id, Class<T> classType) throws IOException, InterruptedException{
         String uri = buildURI(classType) + id;
-        System.out.println(uri);
-        System.out.println("Procurando objeto no banco de dados");
         HttpResponse<String> response = httpRequester.SendRequest(uri, HttpMethod.GET);
-        // System.out.println(response.body());
         ObjectMapper objectMapper = new ObjectMapper();
+
+        System.out.println(response.body());
 
         return (ObjectModel) objectMapper.readValue(response.body(), classType);
     }
 
     public <T> ObjectModel save(int id, ObjectModel obj,Class<T> classType) throws IOException, InterruptedException{
+
         String url = buildURI(classType) + id;
+        logger.info("Saving object with classType: " + classType.getSimpleName() + " and id: " + id);
+        
 
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(obj); 
+        logger.info("Object: " + body);
+
+        System.out.println(body);
+        
         HttpResponse<String> response = httpRequester.SendRequest(url, HttpMethod.PUT, body);
+        logger.info("Response status: " + response.statusCode());
+        logger.info("returned body: " + body);
         return (ObjectModel) objectMapper.readValue(response.body(), classType);
     }
 
@@ -87,7 +100,6 @@ public class Repository {
         String body = objectMapper.writeValueAsString(obj); 
         
         HttpResponse<String> response = httpRequester.SendRequest(url, HttpMethod.POST, body);
-        System.out.println(url + " " + body);
         return (ObjectModel) objectMapper.readValue(response.body(), classType);
     }
 
