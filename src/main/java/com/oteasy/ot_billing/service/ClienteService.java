@@ -66,8 +66,9 @@ public class ClienteService {
 
     public ResponseEntity<?> updateCliente(int id, Cliente cliente)  {
         try{
+            System.out.println("Updanting Cliente");
             Cliente existingCliente = (Cliente) repository.findById(id, Cliente.class);
-            
+            System.out.println("Cliente: " + existingCliente.getId());
             if(existingCliente != null && existingCliente.getId() > 0) {
                 Cliente updatedCliente = (Cliente)repository.save(id, cliente, Cliente.class);
                 return new ResponseEntity<Cliente>(updatedCliente, HttpStatus.OK);

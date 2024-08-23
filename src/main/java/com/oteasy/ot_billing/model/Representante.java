@@ -17,6 +17,7 @@ public class Representante implements ObjectModel {
     private int id;
     private String nome;
     private int empresa_id;
+    private String nomeEmpresa;
     private String email;
     private String telefone;
     private String isActive;
